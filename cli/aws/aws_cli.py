@@ -15,14 +15,16 @@ import boto3
 import botocore
 import os
 from dotenv import load_dotenv
-from ..cli import Cli 
-
+from ..cli import Cli
 
 '''
 This is AWS Command Class
 '''
+
+
 class AwsCli(Cli):
-    _account_id = None
+    # 
+    aws_profile = None
     _region = None
 
     # constructor.
@@ -31,15 +33,13 @@ class AwsCli(Cli):
             AwsCli.setProperties()
         self.setEvironment(environment)
 
-
     # destructor.
+
     def __del__(self):
         del self._environment
 
-
     def setEvironment(self, environment: str):
         self._environment = environment
-
 
     @classmethod
     def setProperties(cls):
@@ -47,18 +47,16 @@ class AwsCli(Cli):
         cls._account_id = os.environ['AWS_ACCOUNT_ID']
         cls._region = os.environ['AWS_REGION']
 
-
     @classmethod
     def getAccountid(cls):
         return cls._account_id
-        
 
     @classmethod
     def getRegion(cls):
         return cls._region
 
-
     # get information of IAM Roles.
+
     @staticmethod
     def getRoles():
         cmd = 'aws iam list-roles --output yaml'
@@ -71,6 +69,3 @@ class AwsCli(Cli):
                 'RoleId': role['RoleId']
             }
         return roles
-
-
-
