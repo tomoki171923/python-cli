@@ -26,7 +26,7 @@ This is DynamoDB Command Class
 class DynamodbCli(AwsCli):
 
     # constructor.
-    def __init__(self):
+    def __init__(self, aws_profile: str, region='ap-northeast-1', environment=None):
         super().__init__(None)
 
     # create a table.

@@ -27,8 +27,8 @@ This is Lambda Command Class
 class LambdaCli(AwsCli):
 
     # constructor.
-    def __init__(self, environment: str):
-        super().__init__(environment)
+    def __init__(self, aws_profile: str, region='ap-northeast-1', environment: str):
+        super().__init__(aws_profile, region, environment)
 
     # create the lambda function
 
@@ -42,8 +42,8 @@ class LambdaCli(AwsCli):
             f"--zip-file fileb://{zip_file} --output yaml "
         if description:
             cmd += f"--description {re.escape(description)} "
-        if self._environment:
-            syntax = f"Variables={{AWS_LAMBDA_FUNCTION_ALIAS={self._environment}}}"
+        if self.environment:
+            syntax = f"Variables={{AWS_LAMBDA_FUNCTION_ALIAS={self.environment}}}"
             cmd += f"--environment {syntax} "
         if layers:
             cmd += f"--layers {' '.join(layers)} "
@@ -63,8 +63,8 @@ class LambdaCli(AwsCli):
             f"--memory-size {memory_size} "
         if description:
             cmd += f"--description {re.escape(description)} "
-        if self._environment:
-            syntax = f"Variables={{AWS_LAMBDA_FUNCTION_ALIAS={self._environment}}}"
+        if self.environment:
+            syntax = f"Variables={{AWS_LAMBDA_FUNCTION_ALIAS={self.environment}}}"
             cmd += f"--environment {syntax} "
         if layers:
             cmd += f"--layers {' '.join(layers)} "
@@ -73,7 +73,7 @@ class LambdaCli(AwsCli):
     # create the lambda alias
 
     def createAlias(self, funciton_name: str, version: str, description=None):
-        cmd = f"aws lambda create-alias --function-name {funciton_name} --name {self._environment} --function-version {re.escape(version)} --output yaml"
+        cmd = f"aws lambda create-alias --function-name {funciton_name} --name {self.environment} --function-version {re.escape(version)} --output yaml"
         if description:
             cmd += f"--description {re.escape(description)} "
         LambdaCli.execCmd(cmd)
@@ -81,7 +81,7 @@ class LambdaCli(AwsCli):
     # update the lambda alias
 
     def updateAlias(self, funciton_name: str, version: str, description=None):
-        cmd = f"aws lambda update-alias --function-name {funciton_name} --name {self._environment} --function-version {re.escape(version)} --output yaml"
+        cmd = f"aws lambda update-alias --function-name {funciton_name} --name {self.environment} --function-version {re.escape(version)} --output yaml"
         if description:
             cmd += f"--description {re.escape(description)} "
         LambdaCli.execCmd(cmd)
@@ -89,15 +89,13 @@ class LambdaCli(AwsCli):
     # add permission into the lambda function which registered to API.
 
     def addPermission(self, api_id: str, functions: str):
-        region = LambdaCli.getRegion()
-        account_id = LambdaCli.getAccountid()
         for func in functions:
             statement_id = LambdaCli.getRandomStr(36)
-            function_name = f"arn:aws:lambda:{region}:{account_id}:function:{func['lambda_name']}:{self._environment}"
+            function_name = f"arn:aws:lambda:{self.region}:{self.account_id}:function:{func['lambda_name']}:{self.environment}"
             for method in func['methods']:
                 if method == 'OPTIONS':
                     continue
-                source_arn = f"arn:aws:execute-api:{region}:{account_id}:{api_id}/*/{method}/{func['resource_name']}"
+                source_arn = f"arn:aws:execute-api:{self.region}:{self.account_id}:{api_id}/*/{method}/{func['resource_name']}"
                 if self.__exsistsPermission(
                         func['lambda_name'], source_arn):
                     continue
@@ -133,7 +131,7 @@ class LambdaCli(AwsCli):
     # check whether the alias of the lambda function exists or not
 
     def existsAlias(self, function_name: str):
-        cmd = f"aws lambda get-alias --function-name {function_name} --name {self._environment} --output yaml"
+        cmd = f"aws lambda get-alias --function-name {function_name} --name {self.environment} --output yaml"
         output = LambdaCli.execCmd(cmd, CliEnum.CMD_OPTION_CONTINUE)
         return True if output.returncode == 0 \
             else False
@@ -141,7 +139,7 @@ class LambdaCli(AwsCli):
     # check whether the permission of the lambda function exists or not
 
     def __exsistsPermission(self, function_name: str, source_arn: str):
-        cmd = f"aws lambda get-policy --function-name '{function_name}:{self._environment}' --output yaml"
+        cmd = f"aws lambda get-policy --function-name '{function_name}:{self.environment}' --output yaml"
         output = LambdaCli.execCmd(cmd, CliEnum.CMD_OPTION_CONTINUE)
         if not output.returncode == 0:
             return False
