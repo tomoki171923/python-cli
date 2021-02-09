@@ -23,40 +23,41 @@ This is AWS Command Class
 
 
 class AwsCli(Cli):
-    # 
-    aws_profile = None
-    _region = None
 
-    # constructor.
-    def __init__(self, environment: str):
-        if AwsCli._account_id is None or AwsCli._region is None:
-            AwsCli.setProperties()
-        self.setEvironment(environment)
+    ''' constructor.
+    Args:
+        aws_profile (str): AWS Profile Name (define it in ~/.aws/credentials).
+        region (str): the target region.
+        environment (str, optional): the target environment.
+    '''
 
-    # destructor.
+    def __init__(self, aws_profile: str, region='ap-northeast-1', environment=None):
+        self.aws_profile = aws_profile
+        os.environ['AWS_PROFILE'] = aws_profile
+        cmd = f"aws sts get-caller-identity --output yaml"
+        output = AwsCli.execCmd(cmd)
+        output_yaml = yaml.safe_load(output.stdout)
+        self.aws_account = output_yaml['Account']
+        self.aws_arn = output_yaml['Arn']
+        self.region = region
+        if environment:
+            self.environment = environment
+
+    ''' destructor
+    '''
 
     def __del__(self):
-        del self._environment
+        if self.environment:
+            del self.environment
+        del self.region
+        del self.aws_arn
+        del self.aws_account
+        del self.aws_profile
 
-    def setEvironment(self, environment: str):
-        self._environment = environment
-
-    @classmethod
-    def setProperties(cls):
-        load_dotenv()
-        cls._account_id = os.environ['AWS_ACCOUNT_ID']
-        cls._region = os.environ['AWS_REGION']
-
-    @classmethod
-    def getAccountid(cls):
-        return cls._account_id
-
-    @classmethod
-    def getRegion(cls):
-        return cls._region
-
-    # get information of IAM Roles.
-
+    ''' get information of IAM Roles.
+    Returns:
+        dict: IAM Roles.
+    '''
     @staticmethod
     def getRoles():
         cmd = 'aws iam list-roles --output yaml'

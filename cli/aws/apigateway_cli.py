@@ -25,8 +25,8 @@ This is API Gateway Command Class
 class ApigatewayCli(AwsCli):
 
     # constructor.
-    def __init__(self, environment: str):
-        super().__init__(environment)
+    def __init__(self, aws_profile: str, region='ap-northeast-1', environment: str)
+    super().__init__(aws_profile, region, environment)
 
     # create API
 
@@ -49,7 +49,7 @@ class ApigatewayCli(AwsCli):
     # export Rest API
 
     def exportApi(self, api_id: str, api_name: str):
-        cmd = f"aws apigateway get-export --parameters extensions='apigateway' --rest-api-id {api_id} --stage-name {self._environment} --export-type oas30 --accepts application/yaml config/apigateway/{api_name}-{self._environment}-oas30-apigateway.yaml"
+        cmd = f"aws apigateway get-export --parameters extensions='apigateway' --rest-api-id {api_id} --stage-name {self.environment} --export-type oas30 --accepts application/yaml config/apigateway/{api_name}-{self.environment}-oas30-apigateway.yaml"
         ApigatewayCli.execCmd(cmd)
 
     # check whether the api exists or not
@@ -69,14 +69,14 @@ class ApigatewayCli(AwsCli):
             output = ApigatewayCli.execCmd(cmd)
             output_yaml = yaml.safe_load(output.stdout)
             for item in output_yaml['item']:
-                if item['stageName'] == self._environment:
+                if item['stageName'] == self.environment:
                     development_id = item['deploymentId']
         return api_id, development_id
 
     # deploy api at the stage (create)
 
     def createStage(self, api_id: str):
-        cmd = f"aws apigateway create-deployment --rest-api-id {api_id} --stage-name {self._environment} --variables alias={self._environment} --output yaml"
+        cmd = f"aws apigateway create-deployment --rest-api-id {api_id} --stage-name {self.environment} --variables alias={self.environment} --output yaml"
         output = ApigatewayCli.execCmd(cmd)
         output_yaml = yaml.safe_load(output.stdout)
         deployment_id = output_yaml["id"]
@@ -102,8 +102,7 @@ class ApigatewayCli(AwsCli):
     # create Rest API;
 
     def __createRestapi(self, api_name: str):
-        region = ApigatewayCli.getRegion()
-        cmd = f"aws apigateway create-rest-api --name {api_name} --region {region} --endpoint-configuration types=REGIONAL --output yaml"
+        cmd = f"aws apigateway create-rest-api --name {api_name} --region {self.region} --endpoint-configuration types=REGIONAL --output yaml"
         output = ApigatewayCli.execCmd(cmd)
         # get rest-api-id
         output_yaml = yaml.safe_load(output.stdout)
@@ -141,5 +140,5 @@ class ApigatewayCli(AwsCli):
     # import Rest API
 
     def __importApi(self, api_id: str, api_name: str):
-        cmd = f"aws apigateway put-rest-api --rest-api-id {api_id} --mode overwrite --cli-binary-format raw-in-base64-out --body 'file://config/apigateway/{api_name}-{self._environment}-oas30-apigateway.yaml' --output yaml"
+        cmd = f"aws apigateway put-rest-api --rest-api-id {api_id} --mode overwrite --cli-binary-format raw-in-base64-out --body 'file://config/apigateway/{api_name}-{self.environment}-oas30-apigateway.yaml' --output yaml"
         ApigatewayCli.execCmd(cmd)

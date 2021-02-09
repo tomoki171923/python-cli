@@ -26,7 +26,7 @@ This is S3 Command Class
 class S3Cli(AwsCli):
 
     # constructor.
-    def __init__(self):
+    def __init__(self, aws_profile: str, region='ap-northeast-1', environment=None):
         super().__init__(None)
 
     # upload objects into the bucket in S3
@@ -39,7 +39,6 @@ class S3Cli(AwsCli):
             cmd += f"--include {re.escape(include)} "
         S3Cli.execCmd(cmd)
 
-
     # download objects from the bucket in S3
 
     def download(self, local_dir: str, s3_dir: str, exclude=None, include=None):
@@ -49,7 +48,6 @@ class S3Cli(AwsCli):
         if include:
             cmd += f"--include {re.escape(include)} "
         S3Cli.execCmd(cmd)
-
 
     # remove files on the bucket in S3
 
