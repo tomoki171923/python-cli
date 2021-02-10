@@ -1,20 +1,6 @@
 # -*- coding: utf-8 -*-
-
-import subprocess
-from subprocess import PIPE
-import termcolor
-import json
-import yaml
-import sys
-import random
-import string
-import datetime
-import pprint
-from pathlib import Path
-import boto3
-import botocore
 import os
-from dotenv import load_dotenv
+import yaml
 from ..cli import Cli
 
 '''
@@ -31,7 +17,7 @@ class AwsCli(Cli):
         environment (str, optional): the target environment.
     '''
 
-    def __init__(self, aws_profile: str, region='ap-northeast-1', environment=None):
+    def __init__(self, aws_profile: str, environment=None, region='ap-northeast-1'):
         self.aws_profile = aws_profile
         os.environ['AWS_PROFILE'] = aws_profile
         cmd = f"aws sts get-caller-identity --output yaml"
@@ -40,15 +26,13 @@ class AwsCli(Cli):
         self.aws_account = output_yaml['Account']
         self.aws_arn = output_yaml['Arn']
         self.region = region
-        if environment:
-            self.environment = environment
+        self.environment = environment
 
     ''' destructor
     '''
 
     def __del__(self):
-        if self.environment:
-            del self.environment
+        del self.environment
         del self.region
         del self.aws_arn
         del self.aws_account

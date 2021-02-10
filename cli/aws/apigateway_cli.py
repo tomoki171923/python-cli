@@ -1,20 +1,5 @@
 # -*- coding: utf-8 -*-
-
-import subprocess
-from subprocess import PIPE
-import termcolor
-import json
 import yaml
-import sys
-import random
-import string
-import datetime
-import pprint
-from pathlib import Path
-import boto3
-import botocore
-import os
-from dotenv import load_dotenv
 from .aws_cli import AwsCli
 
 '''
@@ -24,9 +9,12 @@ This is API Gateway Command Class
 
 class ApigatewayCli(AwsCli):
 
-    # constructor.
-    def __init__(self, aws_profile: str, region='ap-northeast-1', environment: str)
-    super().__init__(aws_profile, region, environment)
+    ''' constructor.
+        Refer super class's constructor.
+    '''
+
+    def __init__(self, aws_profile: str, environment: str, region='ap-northeast-1'):
+        super().__init__(aws_profile=aws_profile, environment=environment, region=region)
 
     # create API
 
