@@ -1,37 +1,27 @@
 # -*- coding: utf-8 -*-
 
-import subprocess
-from subprocess import PIPE
-import termcolor
-import json
-import yaml
-import sys
-import random
-import string
-import datetime
-import pprint
-from pathlib import Path
 import os
-from dotenv import load_dotenv
-from ..cli import Cli 
+from ..cli import Cli
 
 
 '''
 This is Docker Command Class
 '''
-class DockerCli(Cli):
+
+
+class Docker(Cli):
 
     # constructor.
     def __init__(self):
         pass
 
-
     # destructor.
+
     def __del__(self):
         pass
 
-
     # check whether the docker process is running or not
+
     @classmethod
     def isRunning(cls):
         cmd = 'docker ps'
@@ -45,4 +35,3 @@ class DockerCli(Cli):
                     is_running = True
                     break
         return is_running
-

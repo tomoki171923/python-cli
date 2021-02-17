@@ -8,7 +8,7 @@ This is AWS Command Class
 '''
 
 
-class AwsCli(Cli):
+class Aws(Cli):
 
     ''' constructor.
     Args:
@@ -21,7 +21,7 @@ class AwsCli(Cli):
         self.aws_profile = aws_profile
         os.environ['AWS_PROFILE'] = aws_profile
         cmd = f"aws sts get-caller-identity --output yaml"
-        output = AwsCli.execCmd(cmd)
+        output = Aws.execCmd(cmd)
         output_yaml = yaml.safe_load(output.stdout)
         self.aws_account = output_yaml['Account']
         self.aws_arn = output_yaml['Arn']
@@ -45,7 +45,7 @@ class AwsCli(Cli):
     @staticmethod
     def getRoles():
         cmd = 'aws iam list-roles --output yaml'
-        output = AwsCli.execCmd(cmd)
+        output = Aws.execCmd(cmd)
         output_yaml = yaml.safe_load(output.stdout)
         roles = dict()
         for role in output_yaml['Roles']:

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from .aws_cli import AwsCli
+from .aws import Aws
 from ..cli_enum import CliEnum
 
 '''
@@ -7,7 +7,7 @@ This is DynamoDB Command Class
 '''
 
 
-class DynamodbCli(AwsCli):
+class Dynamodb(Aws):
 
     ''' constructor.
         Refer super class's constructor.
@@ -19,13 +19,13 @@ class DynamodbCli(AwsCli):
     # create a table.
 
     def createTable(self, table_name: str):
-        json_data = DynamodbCli.loadJson(
+        json_data = Dynamodb.loadJson(
             f"config/dynamodb/{table_name}.json", CliEnum.RETURN_TYPE_STRING)
         cmd = f"aws dynamodb create-table --output text --cli-input-json '{json_data}'"
-        DynamodbCli.execCmd(cmd)
+        Dynamodb.execCmd(cmd)
 
     # delete a table.
 
     def deleteTable(self, table_name: str):
         cmd = f"aws dynamodb delete-table --table-name {table_name}"
-        DynamodbCli.execCmd(cmd)
+        Dynamodb.execCmd(cmd)
