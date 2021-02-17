@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from .aws_cli import AwsCli
+from .aws import Aws
 import re
 
 '''
@@ -8,7 +8,7 @@ This is S3 Command Class
 '''
 
 
-class S3Cli(AwsCli):
+class S3(Aws):
 
     ''' constructor.
         Refer super class's constructor.
@@ -25,8 +25,8 @@ class S3Cli(AwsCli):
         exclude (str, optional): exclude objects with UNIX style wildcards.
         include (str, optional): include objects with UNIX style wildcards.
     e.g.
-        from cli.aws.s3_cli import S3Cli
-        s3_cli = S3Cli('default')
+        from cli.aws.s3 import S3
+        s3_cli = S3('default')
         s3_cli.upload('./data', 'MY_BUCKET', 'MY_FOLDER/MY_SUB_FOLDER', "*", "*.txt")
         --> it will upload only files ending with .txt:
     '''
@@ -37,7 +37,7 @@ class S3Cli(AwsCli):
             cmd += f"--exclude {re.escape(exclude)} "
         if include:
             cmd += f"--include {re.escape(include)} "
-        S3Cli.execCmd(cmd)
+        S3.execCmd(cmd)
 
     ''' download objects into the bucket in S3
     Args:
@@ -47,8 +47,8 @@ class S3Cli(AwsCli):
         exclude (str, optional): exclude objects with UNIX style wildcards.
         include (str, optional): include objects with UNIX style wildcards.
     e.g.
-        from cli.aws.s3_cli import S3Cli
-        s3_cli = S3Cli('default')
+        from cli.aws.s3 import S3
+        s3_cli = S3('default')
         s3_cli.download('~/Downloads/', 'MY_BUCKET', 'MY_FOLDER/MY_SUB_FOLDER')
     '''
 
@@ -58,7 +58,7 @@ class S3Cli(AwsCli):
             cmd += f"--exclude {re.escape(exclude)} "
         if include:
             cmd += f"--include {re.escape(include)} "
-        S3Cli.execCmd(cmd)
+        S3.execCmd(cmd)
 
     ''' remove objects on the bucket in S3
     Args:
@@ -74,7 +74,7 @@ class S3Cli(AwsCli):
             cmd += f"--exclude {re.escape(exclude)} "
         if include:
             cmd += f"--include {re.escape(include)} "
-        S3Cli.execCmd(cmd)
+        S3.execCmd(cmd)
 
     ''' list objects on the bucket in S3
     Args:
@@ -88,4 +88,4 @@ class S3Cli(AwsCli):
             cmd += f"{re.escape(bucket_name)}/"
             if prefix_name:
                 cmd += f"{re.escape(prefix_name)}"
-        S3Cli.execCmd(cmd)
+        S3.execCmd(cmd)
