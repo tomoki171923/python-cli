@@ -33,7 +33,7 @@ class AwsCli(Cli):
     '''
 
     def __del__(self):
-        if self.environment is not None:
+        if hasattr(self, 'environment'):
             del self.environment
         del self.region
         del self.aws_arn
