@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import yaml
 import re
-from .aws import Aws
+from .aws_cli import AwsCli
 from ..cli_enum import CliEnum
 
 '''
@@ -9,7 +9,7 @@ This is Lambda Command Class
 '''
 
 
-class Lambda(Aws):
+class LambdaCli(AwsCli):
 
     ''' constructor.
         Refer super class's constructor.
@@ -35,14 +35,14 @@ class Lambda(Aws):
             cmd += f"--environment {syntax} "
         if layers:
             cmd += f"--layers {' '.join(layers)} "
-        Lambda.execCmd(cmd)
+        LambdaCli.execCmd(cmd)
 
     # TODO: dynamodb と同様に--cli-input-jsonでupload知るように修正
     # update the lambda function
 
     def updateFunction(self, function_name: str, zip_file: str, role: str, timeout: int, memory_size: int, layers: list, description=None):
         cmd = f"aws lambda update-function-code --function-name {function_name} --zip-file fileb://{zip_file} --output yaml"
-        Lambda.execCmd(cmd)
+        LambdaCli.execCmd(cmd)
         cmd = f"aws lambda update-function-configuration --function-name {function_name} --output yaml " \
             '--runtime python3.8 ' \
             f"--role {role} " \
@@ -56,7 +56,7 @@ class Lambda(Aws):
             cmd += f"--environment {syntax} "
         if layers:
             cmd += f"--layers {' '.join(layers)} "
-        Lambda.execCmd(cmd)
+        LambdaCli.execCmd(cmd)
 
     # create the lambda alias
 
@@ -64,7 +64,7 @@ class Lambda(Aws):
         cmd = f"aws lambda create-alias --function-name {funciton_name} --name {self.environment} --function-version {re.escape(version)} --output yaml"
         if description:
             cmd += f"--description {re.escape(description)} "
-        Lambda.execCmd(cmd)
+        LambdaCli.execCmd(cmd)
 
     # update the lambda alias
 
@@ -72,13 +72,13 @@ class Lambda(Aws):
         cmd = f"aws lambda update-alias --function-name {funciton_name} --name {self.environment} --function-version {re.escape(version)} --output yaml"
         if description:
             cmd += f"--description {re.escape(description)} "
-        Lambda.execCmd(cmd)
+        LambdaCli.execCmd(cmd)
 
     # add permission into the lambda function which registered to API.
 
     def addPermission(self, api_id: str, functions: str):
         for func in functions:
-            statement_id = Lambda.getRandomStr(36)
+            statement_id = LambdaCli.getRandomStr(36)
             function_name = f"arn:aws:lambda:{self.region}:{self.account_id}:function:{func['lambda_name']}:{self.environment}"
             for method in func['methods']:
                 if method == 'OPTIONS':
@@ -88,7 +88,7 @@ class Lambda(Aws):
                         func['lambda_name'], source_arn):
                     continue
                 cmd = f"aws lambda add-permission  --function-name '{function_name}'  --source-arn '{source_arn}'  --principal apigateway.amazonaws.com  --statement-id {statement_id}  --action lambda:InvokeFunction  --output yaml"
-                Lambda.execCmd(cmd)
+                LambdaCli.execCmd(cmd)
 
     # creates a version from the current code and configuration of a function of AWS Lambda.
 
@@ -96,7 +96,7 @@ class Lambda(Aws):
         cmd = f"aws lambda publish-version --function-name {function_name} --output yaml"
         if description:
             cmd += f" --description {re.escape(description)}"
-        output = Lambda.execCmd(cmd)
+        output = LambdaCli.execCmd(cmd)
         output_yaml = yaml.safe_load(output.stdout)
         return output_yaml['Version']
 
@@ -106,13 +106,13 @@ class Lambda(Aws):
         cmd = f"aws lambda publish-layer-version --layer-name {layer_name} --license-info 'MIT' --compatible-runtimes python3.8 --zip-file fileb://{zip_file} --output yaml"
         if description:
             cmd += f" --description {re.escape(description)}"
-        Lambda.execCmd(cmd)
+        LambdaCli.execCmd(cmd)
 
     # check whether the lambda function exists or not
 
     def existsFunction(self, function_name: str):
         cmd = f"aws lambda get-function --function-name {function_name} --output yaml"
-        output = Lambda.execCmd(cmd, CliEnum.CMD_OPTION_CONTINUE)
+        output = LambdaCli.execCmd(cmd, CliEnum.CMD_OPTION_CONTINUE)
         return True if output.returncode == 0 \
             else False
 
@@ -120,7 +120,7 @@ class Lambda(Aws):
 
     def existsAlias(self, function_name: str):
         cmd = f"aws lambda get-alias --function-name {function_name} --name {self.environment} --output yaml"
-        output = Lambda.execCmd(cmd, CliEnum.CMD_OPTION_CONTINUE)
+        output = LambdaCli.execCmd(cmd, CliEnum.CMD_OPTION_CONTINUE)
         return True if output.returncode == 0 \
             else False
 
@@ -128,7 +128,7 @@ class Lambda(Aws):
 
     def __exsistsPermission(self, function_name: str, source_arn: str):
         cmd = f"aws lambda get-policy --function-name '{function_name}:{self.environment}' --output yaml"
-        output = Lambda.execCmd(cmd, CliEnum.CMD_OPTION_CONTINUE)
+        output = LambdaCli.execCmd(cmd, CliEnum.CMD_OPTION_CONTINUE)
         if not output.returncode == 0:
             return False
         output_yaml = yaml.safe_load(output.stdout)
@@ -139,7 +139,7 @@ class Lambda(Aws):
 
     def getLayers(self):
         cmd = 'aws lambda list-layers --compatible-runtime python3.8 --output yaml'
-        output = Lambda.execCmd(cmd)
+        output = LambdaCli.execCmd(cmd)
         output_yaml = yaml.safe_load(output.stdout)
         layers = dict()
         for layer in output_yaml['Layers']:

@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 import yaml
-from .aws import Aws
+from .aws_cli import AwsCli
 
 '''
 This is API Gateway Command Class
 '''
 
 
-class Apigateway(Aws):
+class ApigatewayCli(AwsCli):
 
     ''' constructor.
         Refer super class's constructor.
@@ -38,7 +38,7 @@ class Apigateway(Aws):
 
     def exportApi(self, api_id: str, api_name: str):
         cmd = f"aws apigateway get-export --parameters extensions='apigateway' --rest-api-id {api_id} --stage-name {self.environment} --export-type oas30 --accepts application/yaml config/apigateway/{api_name}-{self.environment}-oas30-apigateway.yaml"
-        Apigateway.execCmd(cmd)
+        ApigatewayCli.execCmd(cmd)
 
     # check whether the api exists or not
 
@@ -46,7 +46,7 @@ class Apigateway(Aws):
         api_id = None
         development_id = None
         cmd = f"aws apigateway get-rest-apis --output yaml"
-        output = Apigateway.execCmd(cmd)
+        output = ApigatewayCli.execCmd(cmd)
         output_yaml = yaml.safe_load(output.stdout)
         for item in output_yaml['items']:
             if item['name'] == api_name:
@@ -54,7 +54,7 @@ class Apigateway(Aws):
                 break
         if api_id is not None:
             cmd = f"aws apigateway get-stages --rest-api-id {api_id} --output yaml"
-            output = Apigateway.execCmd(cmd)
+            output = ApigatewayCli.execCmd(cmd)
             output_yaml = yaml.safe_load(output.stdout)
             for item in output_yaml['item']:
                 if item['stageName'] == self.environment:
@@ -65,7 +65,7 @@ class Apigateway(Aws):
 
     def createStage(self, api_id: str):
         cmd = f"aws apigateway create-deployment --rest-api-id {api_id} --stage-name {self.environment} --variables alias={self.environment} --output yaml"
-        output = Apigateway.execCmd(cmd)
+        output = ApigatewayCli.execCmd(cmd)
         output_yaml = yaml.safe_load(output.stdout)
         deployment_id = output_yaml["id"]
         return deployment_id
@@ -74,7 +74,7 @@ class Apigateway(Aws):
 
     def getLambdaInfos(self, api_id: str):
         cmd = f"aws apigateway get-resources --rest-api-id {api_id} --output yaml"
-        output = Apigateway.execCmd(cmd)
+        output = ApigatewayCli.execCmd(cmd)
         output_yaml = yaml.safe_load(output.stdout)
         lambda_names = list()
         for item in output_yaml['items']:
@@ -91,13 +91,13 @@ class Apigateway(Aws):
 
     def __createRestapi(self, api_name: str):
         cmd = f"aws apigateway create-rest-api --name {api_name} --region {self.region} --endpoint-configuration types=REGIONAL --output yaml"
-        output = Apigateway.execCmd(cmd)
+        output = ApigatewayCli.execCmd(cmd)
         # get rest-api-id
         output_yaml = yaml.safe_load(output.stdout)
         rest_api_id = output_yaml['id']
         # get resource-id
         cmd = f"aws apigateway get-resources --rest-api-id {rest_api_id} --output yaml"
-        output = Apigateway.execCmd(cmd)
+        output = ApigatewayCli.execCmd(cmd)
         output_yaml = yaml.safe_load(output.stdout)
         for item in output_yaml['items']:
             parent_id = item['id']
@@ -108,7 +108,7 @@ class Apigateway(Aws):
 
     def __createResource(self, api_id: str, parent_id: str, path_part: str):
         cmd = f"aws apigateway create-resource --rest-api-id {api_id} --parent-id {parent_id} --path-part {path_part} --output yaml"
-        output = Apigateway.execCmd(cmd)
+        output = ApigatewayCli.execCmd(cmd)
         output_yaml = yaml.safe_load(output.stdout)
         resource_id = output_yaml["id"]
         return resource_id
@@ -117,16 +117,16 @@ class Apigateway(Aws):
 
     def __putMethod(self, api_id: str, resource_id: str, http_method: str, authorization_type: str):
         cmd = f"aws apigateway put-method --rest-api-id {api_id} --resource-id {resource_id} --http-method {http_method} --authorization-type {authorization_type}"
-        Apigateway.execCmd(cmd)
+        ApigatewayCli.execCmd(cmd)
 
     # set integration into the method
 
     def __putIntegration(self, api_id: str, resource_id: str, http_method: str, type: str):
         cmd = f"aws apigateway put-integration --rest-api-id {api_id} --resource-id {resource_id} --http-method {http_method} --type {type}"
-        Apigateway.execCmd(cmd)
+        ApigatewayCli.execCmd(cmd)
 
     # import Rest API
 
     def __importApi(self, api_id: str, api_name: str):
         cmd = f"aws apigateway put-rest-api --rest-api-id {api_id} --mode overwrite --cli-binary-format raw-in-base64-out --body 'file://config/apigateway/{api_name}-{self.environment}-oas30-apigateway.yaml' --output yaml"
-        Apigateway.execCmd(cmd)
+        ApigatewayCli.execCmd(cmd)
