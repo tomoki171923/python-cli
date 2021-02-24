@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-
-from .aws import Aws
+from .aws_cli import AwsCli
 import re
 
 '''
@@ -8,7 +7,7 @@ This is S3 Command Class
 '''
 
 
-class S3(Aws):
+class S3Cli(AwsCli):
 
     ''' constructor.
         Refer super class's constructor.
