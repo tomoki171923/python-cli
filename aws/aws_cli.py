@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+# the following is not necessary if Python version is 3.9 or over.
+from __future__ import annotations
+
 import os
 import yaml
 from ..cli import Cli
@@ -17,7 +20,7 @@ class AwsCli(Cli):
         environment (str, optional): the target environment.
     '''
 
-    def __init__(self, aws_profile: str, environment=None, region='ap-northeast-1'):
+    def __init__(self, aws_profile: str, environment=None, region='ap-northeast-1') -> AwsCli:
         self.aws_profile = aws_profile
         os.environ['AWS_PROFILE'] = aws_profile
         cmd = f"aws sts get-caller-identity --output yaml"
@@ -32,7 +35,7 @@ class AwsCli(Cli):
     ''' destructor
     '''
 
-    def __del__(self):
+    def __del__(self) -> None:
         if hasattr(self, 'environment'):
             del self.environment
         del self.region
@@ -45,7 +48,7 @@ class AwsCli(Cli):
         dict: IAM Roles.
     '''
     @staticmethod
-    def getRoles():
+    def getRoles() -> dict:
         cmd = 'aws iam list-roles --output yaml'
         output = AwsCli.execCmd(cmd)
         output_yaml = yaml.safe_load(output.stdout)
