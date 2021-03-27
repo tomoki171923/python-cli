@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# the following is not necessary if Python version is 3.9 or over.
+from __future__ import annotations
 
 import subprocess
 from subprocess import PIPE
@@ -14,6 +16,7 @@ from pathlib import Path
 import traceback
 import inspect
 from .cli_enum import CliEnum
+from typing import Union
 
 
 '''
@@ -43,7 +46,7 @@ class Cli:
         subprocess.CompletedProcess: the result of executing command.
     '''
     @staticmethod
-    def execCmd(cmd: str, error_option=CliEnum.CMD_OPTION_STOP):
+    def execCmd(cmd: str, error_option=CliEnum.CMD_OPTION_STOP) -> subprocess.CompletedProcess:
         try:
             print(f' ---------- [COMMAND] {cmd} ---------- ')
             result = subprocess.run(
@@ -84,7 +87,7 @@ class Cli:
         str: the random string.
     '''
     @staticmethod
-    def getRandomStr(count: int):
+    def getRandomStr(count: int) -> str:
         return ''.join(random.choices(string.ascii_lowercase + string.digits + '-', k=count))
 
     ''' Get the current time with string.
@@ -92,7 +95,7 @@ class Cli:
         str: the current time 
     '''
     @staticmethod
-    def now():
+    def now() -> str:
         return datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
 
     ''' Loading a file as yaml format
@@ -102,7 +105,7 @@ class Cli:
         dict: file data
     '''
     @staticmethod
-    def loadYaml(file_path: str):
+    def loadYaml(file_path: str) -> dict:
         with open(file_path) as file:
             return yaml.safe_load(file)
 
@@ -116,7 +119,7 @@ class Cli:
         dict or str: file data
     '''
     @staticmethod
-    def loadJson(file_path: str, return_type=CliEnum.RETURN_TYPE_DICT):
+    def loadJson(file_path: str, return_type=CliEnum.RETURN_TYPE_DICT) -> Union[dict, str]:
         with open(file_path) as file:
             json_data = json.load(file)
             if return_type == CliEnum.RETURN_TYPE_STRING:
@@ -132,7 +135,7 @@ class Cli:
             SEVERIY_WARN: level waring
     '''
     @staticmethod
-    def stdout(message: str, severity=CliEnum.SEVERIY_INFO):
+    def stdout(message: str, severity=CliEnum.SEVERIY_INFO) -> None:
         color = 'green'
         if severity == CliEnum.SEVERIY_ERROR:
             color = 'red'
