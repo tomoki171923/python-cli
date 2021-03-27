@@ -125,11 +125,11 @@ class LambdaCli(AwsCli):
     def addPermission(self, api_id: str, functions: str) -> subprocess.CompletedProcess:
         for func in functions:
             statement_id = LambdaCli.getRandomStr(36)
-            function_name = f"arn:aws:lambda:{self.region}:{self.account_id}:function:{func['lambda_name']}:{self.environment}"
+            function_name = f"arn:aws:lambda:{self.region}:{self.aws_account}:function:{func['lambda_name']}:{self.environment}"
             for method in func['methods']:
                 if method == 'OPTIONS':
                     continue
-                source_arn = f"arn:aws:execute-api:{self.region}:{self.account_id}:{api_id}/*/{method}/{func['resource_name']}"
+                source_arn = f"arn:aws:execute-api:{self.region}:{self.aws_account}:{api_id}/*/{method}/{func['resource_name']}"
                 if self.__exsistsPermission(
                         func['lambda_name'], source_arn):
                     continue
